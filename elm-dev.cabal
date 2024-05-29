@@ -50,6 +50,7 @@ Executable elm-dev
         -- elmx
         ext-common
         ext-sentry
+        ext-hvm
         -- elm-dev
         ext-dev
 
@@ -229,6 +230,9 @@ Executable elm-dev
         Ext.MemoryCached.Details
         Ext.MemoryCached.Generate
         Ext.Project.Find
+
+        -- ext-hvm
+        Ext.Generate.Bend
 
         -- elm-dev cli interface
         Terminal.Dev
