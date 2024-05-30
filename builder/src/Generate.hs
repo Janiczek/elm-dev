@@ -26,6 +26,7 @@ import qualified Elm.Interface as I
 import qualified Elm.ModuleName as ModuleName
 import qualified Elm.Package as Pkg
 import qualified Ext.FileProxy as File
+import qualified Generate.Bend as Bend
 import qualified Generate.JavaScript as JS
 import qualified Generate.Mode as Mode
 import qualified Nitpick.Debug as Nitpick
@@ -55,7 +56,7 @@ debug root details (Build.Artifacts pkg ifaces roots modules) =
       let mode = Mode.Dev (Just types)
       let graph = objectsToGlobalGraph objects
       let mains = gatherMains pkg objects roots
-      return $ JS.generate mode graph mains
+      return $ Bend.generate mode graph mains
 
 
 dev :: FilePath -> Details.Details -> Build.Artifacts -> Task B.Builder
@@ -64,7 +65,7 @@ dev root details (Build.Artifacts pkg _ roots modules) =
       let mode = Mode.Dev Nothing
       let graph = objectsToGlobalGraph objects
       let mains = gatherMains pkg objects roots
-      return $ JS.generate mode graph mains
+      return $ Bend.generate mode graph mains
 
 
 prod :: FilePath -> Details.Details -> Build.Artifacts -> Task B.Builder
@@ -74,7 +75,7 @@ prod root details (Build.Artifacts pkg _ roots modules) =
       let graph = objectsToGlobalGraph objects
       let mode = Mode.Prod (Mode.shortenFieldNames graph)
       let mains = gatherMains pkg objects roots
-      return $ JS.generate mode graph mains
+      return $ Bend.generate mode graph mains
 
 
 repl :: FilePath -> Details.Details -> Bool -> Build.ReplArtifacts -> N.Name -> Task B.Builder
