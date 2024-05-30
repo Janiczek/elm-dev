@@ -11,6 +11,7 @@ import qualified Data.List as List
 import Data.Map ((!))
 import qualified Data.Map as Map
 import Data.Monoid ((<>))
+import Data.Name (Name)
 import qualified Data.Set as Set
 import qualified Elm.ModuleName as ModuleName
 import qualified Generate.Mode as Mode
@@ -58,9 +59,11 @@ initBuilders =
 
 tupleGetters :: [B.Builder]
 tupleGetters =
-  [ "_Elm.GetTuple.el0 (a,*)         = a",
-    "_Elm.GetTuple.el1 (*,(b,*))     = b",
-    "_Elm.GetTuple.el2 (*,(*,(c,*))) = c"
+  [ "_Elm.GetTuple.el0 (a,*) = a",
+    "_Elm.GetTuple.el1 (*,b) = b",
+    "_Elm.GetTriple.el0 (a,*)     = a",
+    "_Elm.GetTriple.el1 (*,(b,*)) = b",
+    "_Elm.GetTriple.el2 (*,(*,c)) = c"
   ]
 
 -- ADD DEPENDENCIES
@@ -79,18 +82,11 @@ addGlobalHelp mode graph global state =
         Set.foldl' (addGlobal mode graph) someState deps
    in case graph ! global of
         Opt.Define expr deps ->
-          -- addStmt
-          --   (addDeps deps state)
-          --   ( var global (Expr.generate mode expr)
-          --   )
-          error "TODO Opt.Define"
+          let stateWithDeps = addDeps deps state
+           in addValueDecl global expr stateWithDeps
         Opt.DefineTailFunc argNames body deps ->
-          -- addStmt
-          --   (addDeps deps state)
-          --   ( let (Opt.Global _ name) = global
-          --      in var global (Expr.generateTailDef mode name argNames body)
-          --   )
-          error "TODO Opt.DefineTailFunc"
+          let stateWithDeps = addDeps deps state
+           in addFunctionDecl global argNames body stateWithDeps
         Opt.Ctor index arity ->
           -- addStmt
           --   state
@@ -138,3 +134,11 @@ addGlobalHelp mode graph global state =
           --   ( generatePort mode global "outgoingPort" encoder
           --   )
           error "TODO Opt.PortOutgoing"
+
+addValueDecl :: Opt.Global -> Opt.Expr -> State -> State
+addValueDecl global expr state =
+  error "TODO addValueDecl"
+
+addFunctionDecl :: Opt.Global -> [Name] -> Opt.Expr -> State -> State
+addFunctionDecl global argNames body state =
+  error "TODO addFunctionDecl"
