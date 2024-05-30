@@ -100,7 +100,8 @@ sansFontPath =
 
 elm :: BS.ByteString
 elm =
-  $(bsToExp =<< runIO Build.buildReactorFrontEnd)
+  -- $(bsToExp =<< runIO Build.buildReactorFrontEnd)
+  "Snipped in the Bend branch. Would crash due to kernel code anyways."
 
 
 
