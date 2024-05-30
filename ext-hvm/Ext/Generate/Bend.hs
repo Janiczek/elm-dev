@@ -12,8 +12,11 @@ import Data.Map ((!))
 import qualified Data.Map as Map
 import Data.Monoid ((<>))
 import Data.Name (Name)
+import qualified Data.Name as Name
 import qualified Data.Set as Set
+import qualified Data.Utf8 as Utf8
 import qualified Elm.ModuleName as ModuleName
+import qualified Elm.Package as Pkg
 import qualified Generate.Mode as Mode
 
 -- GENERATE
@@ -59,6 +62,7 @@ initBuilders =
 
 tupleGetters :: [B.Builder]
 tupleGetters =
+  -- TODO newlines?
   [ "_Elm.GetTuple.el0 (a,*) = a",
     "_Elm.GetTuple.el1 (*,b) = b",
     "_Elm.GetTriple.el0 (a,*)     = a",
@@ -135,10 +139,85 @@ addGlobalHelp mode graph global state =
           --   )
           error "TODO Opt.PortOutgoing"
 
+addBuilder :: B.Builder -> State -> State
+addBuilder builder (State revBuilders seenGlobals) =
+  State (builder : revBuilders) seenGlobals
+
+-- foo = (...)
 addValueDecl :: Opt.Global -> Opt.Expr -> State -> State
 addValueDecl global expr state =
-  error "TODO addValueDecl"
+  addBuilder
+    ( globalToBuilder global
+        <> " = "
+        <> exprToBuilder expr
+    )
+    state
 
+-- foo x y = (...)
 addFunctionDecl :: Opt.Global -> [Name] -> Opt.Expr -> State -> State
 addFunctionDecl global argNames body state =
-  error "TODO addFunctionDecl"
+  addBuilder
+    ( globalToBuilder global
+        <> " "
+        <> argsToBuilder argNames
+        <> " = "
+        <> exprToBuilder body
+    )
+    state
+
+globalToBuilder :: Opt.Global -> B.Builder
+globalToBuilder (Opt.Global home name) =
+  homeToBuilder home <> "/" <> Name.toBuilder name
+
+argsToBuilder :: [Name] -> B.Builder
+argsToBuilder args =
+  joinWith " " args
+
+joinWith :: B.Builder -> [Name] -> B.Builder
+joinWith _ [] = mempty
+joinWith _ [a] = Name.toBuilder a
+joinWith delim (a : as) = Name.toBuilder a <> delim <> joinWith delim as
+
+delim :: B.Builder
+delim =
+  "//"
+
+homeToBuilder :: ModuleName.Canonical -> B.Builder
+homeToBuilder (ModuleName.Canonical (Pkg.Name author project) home) =
+  delim
+    <> Utf8.toBuilder author
+    <> delim
+    <> Utf8.toBuilder project
+    <> delim
+    <> Utf8.toBuilder home
+
+exprToBuilder :: Opt.Expr -> B.Builder
+exprToBuilder expr =
+  case expr of
+    Opt.Bool b -> error "TODO exprToBuilder Bool"
+    Opt.Chr str -> error "TODO exprToBuilder Chr"
+    Opt.Str str -> error "TODO exprToBuilder Str"
+    Opt.Int i -> error "TODO exprToBuilder Int"
+    Opt.Float f -> error "TODO exprToBuilder Float"
+    Opt.VarLocal name -> error "TODO exprToBuilder VarLocal"
+    Opt.VarGlobal name -> error "TODO exprToBuilder VarGlobal"
+    Opt.VarEnum name i -> error "TODO exprToBuilder VarEnum"
+    Opt.VarBox name -> error "TODO exprToBuilder VarBox"
+    Opt.VarCycle moduleName name -> error "TODO exprToBuilder VarCycle"
+    Opt.VarDebug a1 a2 a3 a4 -> error "TODO exprToBuilder VarDebug"
+    Opt.VarKernel a1 a2 -> error "TODO exprToBuilder VarKernel"
+    Opt.List list -> error "TODO exprToBuilder List"
+    Opt.Function args body -> error "TODO exprToBuilder Function"
+    Opt.Call fn args -> error "TODO exprToBuilder Call"
+    Opt.TailCall a as -> error "TODO exprToBuilder TailCall"
+    Opt.If a1 a2 -> error "TODO exprToBuilder If"
+    Opt.Let def expr_ -> error "TODO exprToBuilder Let"
+    Opt.Destruct d expr -> error "TODO exprToBuilder Destruct"
+    Opt.Case n1 n2 decider cases -> error "TODO exprToBuilder Case"
+    Opt.Accessor name -> error "TODO exprToBuilder Accessor"
+    Opt.Access expr_ name -> error "TODO exprToBuilder Access"
+    Opt.Update expr_ fields -> error "TODO exprToBuilder Update"
+    Opt.Record fields -> error "TODO exprToBuilder Record"
+    Opt.Unit -> error "TODO exprToBuilder Unit"
+    Opt.Tuple t1 t2 mt3 -> error "TODO exprToBuilder Tuple"
+    Opt.Shader src a2 a3 -> error "TODO exprToBuilder Shader"
