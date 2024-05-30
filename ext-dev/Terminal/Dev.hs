@@ -94,6 +94,7 @@ main =
     , explain
     -- call graph needs some more thought
     -- , callgraph
+    , make
     ]
 
 
@@ -1071,3 +1072,52 @@ mapError toErr result =
 
       Left err ->
           Left (toErr err)
+
+
+
+data MakeFlags = MakeFlags {}
+
+data MakeArgs
+  = MakeFile FilePath
+
+getMake :: MakeArgs -> MakeFlags -> IO ()
+getMake (MakeFile filePath) _ =
+  Make.run [filePath] realMakeFlags
+
+realMakeFlags :: Make.Flags
+realMakeFlags =
+  Make.Flags
+    False
+    False
+    (Just (Make.JS "out.bend"))
+    Nothing
+    Nothing
+
+make :: Terminal.Command
+make =
+  let summary =
+        "Make: compile a file to Bend"
+
+      details =
+        ""
+
+      example =
+        reflow
+          ""
+
+      makeFlags =
+        -- can we better say we don't need to parse anything?
+        flags MakeFlags
+
+      makeArgs =
+        oneOf
+          [ require1 MakeFile Terminal.Helpers.elmFile
+          ]
+   in Terminal.Command
+        "make"
+        (Common summary)
+        details
+        example
+        makeArgs
+        makeFlags
+        getMake
