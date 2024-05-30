@@ -63,11 +63,16 @@ initBuilders =
 tupleGetters :: [B.Builder]
 tupleGetters =
   -- TODO newlines?
-  [ "_Elm.GetTuple.el0 (a,*) = a",
+  -- TODO munging rules ... //, / etc. instead of $
+  [ -- tuples
+    "_Elm.GetTuple.el0 (a,*) = a",
     "_Elm.GetTuple.el1 (*,b) = b",
+    -- triples
     "_Elm.GetTriple.el0 (a,*)     = a",
     "_Elm.GetTriple.el1 (*,(b,*)) = b",
-    "_Elm.GetTriple.el2 (*,(*,c)) = c"
+    "_Elm.GetTriple.el2 (*,(*,c)) = c",
+    -- unit
+    "data _Elm.Unit = _Elm.Unit"
   ]
 
 -- ADD DEPENDENCIES
@@ -106,14 +111,8 @@ addGlobalHelp mode graph global state =
           --   ( generateCycle mode global names values functions
           --   )
           error "TODO Opt.Cycle"
-        Opt.Manager effectsType ->
-          -- generateManager mode graph global effectsType state
-          error "TODO Opt.Manager"
-        Opt.Kernel chunks deps ->
-          -- if isDebugger global && not (Mode.isDebug mode)
-          --   then state
-          --   else addKernel (addDeps deps state) (generateKernel mode chunks)
-          error "TODO Opt.Kernel"
+        Opt.Manager effectsType -> error "Elm->Bend: Effect managers are unsupported."
+        Opt.Kernel chunks deps -> error "Elm->Bend: Kernel code is unsupported."
         Opt.Enum index ->
           -- addStmt
           --   state
@@ -121,23 +120,10 @@ addGlobalHelp mode graph global state =
           --   )
           error "TODO Opt.Enum"
         Opt.Box ->
-          -- addStmt
-          --   (addGlobal mode graph state identity)
-          --   ( generateBox mode global
-          --   )
+          -- = newtype, most likely
           error "TODO Opt.Box"
-        Opt.PortIncoming decoder deps ->
-          -- addStmt
-          --   (addDeps deps state)
-          --   ( generatePort mode global "incomingPort" decoder
-          --   )
-          error "TODO Opt.PortIncoming"
-        Opt.PortOutgoing encoder deps ->
-          -- addStmt
-          --   (addDeps deps state)
-          --   ( generatePort mode global "outgoingPort" encoder
-          --   )
-          error "TODO Opt.PortOutgoing"
+        Opt.PortIncoming decoder deps -> error "Elm->Bend: Ports are unsupported."
+        Opt.PortOutgoing encoder deps -> error "Elm->Bend: Ports are unsupported."
 
 addBuilder :: B.Builder -> State -> State
 addBuilder builder (State revBuilders seenGlobals) =
@@ -218,6 +204,22 @@ exprToBuilder expr =
     Opt.Access expr_ name -> error "TODO exprToBuilder Access"
     Opt.Update expr_ fields -> error "TODO exprToBuilder Update"
     Opt.Record fields -> error "TODO exprToBuilder Record"
-    Opt.Unit -> error "TODO exprToBuilder Unit"
-    Opt.Tuple t1 t2 mt3 -> error "TODO exprToBuilder Tuple"
-    Opt.Shader src a2 a3 -> error "TODO exprToBuilder Shader"
+    Opt.Unit ->
+      "(_Elm.Unit)"
+    Opt.Tuple t1 t2 mt3 ->
+      case mt3 of
+        Nothing ->
+          "("
+            <> exprToBuilder t1
+            <> ","
+            <> exprToBuilder t2
+            <> ")"
+        Just t3 ->
+          "("
+            <> exprToBuilder t1
+            <> ","
+            <> exprToBuilder t2
+            <> ","
+            <> exprToBuilder t3
+            <> ")"
+    Opt.Shader src a2 a3 -> error "Elm->Bend: WebGL shaders are unsupported."
