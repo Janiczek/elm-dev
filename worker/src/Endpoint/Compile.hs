@@ -37,7 +37,6 @@ import qualified Ext.FileProxy as File
 import qualified Generate
 import qualified Generate.Html as Html
 import qualified Generate.JavaScript as JS
-import qualified Ext.Generate.Bend as Bend
 import qualified Generate.Mode as Mode
 import qualified Json.Encode as Encode
 import qualified Parse.Module as Parse
@@ -139,7 +138,7 @@ compile (A.Artifacts interfaces objects) source =
                     mains = Map.singleton home main_
                     graph = Opt.addLocalGraph locals objects
                   in
-                  Success $ Bend.generate mode graph mains
+                  Success name $ JS.generate mode graph mains
 
 
 checkImports :: Map.Map ModuleName.Raw I.Interface -> [Src.Import] -> Either (NE.List Import.Error) (Map.Map ModuleName.Raw I.Interface)
