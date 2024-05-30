@@ -26,7 +26,7 @@ import qualified Elm.Interface as I
 import qualified Elm.ModuleName as ModuleName
 import qualified Elm.Package as Pkg
 import qualified Ext.FileProxy as File
-import qualified Generate.Bend as Bend
+import qualified Ext.Generate.Bend as Bend
 import qualified Generate.JavaScript as JS
 import qualified Generate.Mode as Mode
 import qualified Nitpick.Debug as Nitpick
